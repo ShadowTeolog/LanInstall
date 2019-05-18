@@ -1,0 +1,4 @@
+/.vs/*
+/RedistDto/obj/
+/packages/
+/RedistServ/obj/
