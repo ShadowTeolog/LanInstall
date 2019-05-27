@@ -2,6 +2,7 @@
 using ProtoBuf;
 namespace RedistDto
 {
+    [ProtoContract]
     public class NetworkMessage
     {
         [ProtoMember(1)] public UInt64 Target;

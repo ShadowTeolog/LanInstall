@@ -4,3 +4,10 @@
 /RedistServ/obj/
 /RedistDto/bin/
 /RedistNode/obj/
+RedistClient/bin/Debug/repository
+RedistClient/bin/Debug
+RedistClient/obj
+RedistSrv/bin/Debug
+RedistSrv/bin/run/repository/repository
+RedistSrv/obj/Debug
+RedistSrv/bin/run/repository/log
