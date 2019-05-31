@@ -10,7 +10,8 @@ namespace RedistDto
     [ProtoContract]
     public class ConfigRequest
     {
-
+        [ProtoMember(1,IsRequired = false)]
+        public bool  NeedConfig;
     }
     [ProtoContract]
     public class ClientStat
@@ -29,5 +30,7 @@ namespace RedistDto
         [ProtoMember(3, IsRequired = false)]
         public ClientStat Stat;
 
+        [ProtoMember(4, IsRequired = false)]
+        public bool Echo;
     }
 }

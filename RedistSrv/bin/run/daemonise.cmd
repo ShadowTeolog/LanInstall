@@ -1,1 +1,0 @@
-git daemon --verbose --reuseaddr --export-all --informative-errors --base-path-relaxed --base-path=D:\Projects\LanInstall\RedistSrv\bin\run\repository

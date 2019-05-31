@@ -1,7 +1,10 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Net;
+using System.Threading;
+using ProtoBuf;
 using RedistDto;
 
 namespace RedistServ
@@ -11,56 +14,124 @@ namespace RedistServ
         void Start();
         void Restart();
         void Shutdown();
+        event Action<string> HandleLogEvent;
+        event Action<string> HandleErrorEvent;
     }
 
-    public class Server
+    internal class NodeInfo
     {
-        readonly INetwork _network;
-        public Server(INetwork network)
+        public ulong Id;
+        public RoleSet roles;
+    }
+
+    internal class Server
+    {
+        private readonly Timer _timer;
+        private DateTime _lastserverRectTime;
+        private static readonly RoleSet DefaultRoles = new RoleSet
+        {
+            Roles = new[]
+            {
+                new Role {Name = "NewVisuals", Repository = "NewVisuals", StartupFile = "Visualisation.exe",Branch = "test"},
+                //new Role {Name = "Test", Repository = "TestRep", StartupFile = "UsbKDeviceTest.exe"},
+                new Role {Name = "RedistClient", Repository = "RedistClient"}
+            }
+        };
+
+        private readonly INetwork _network;
+        private readonly Configuration _config;
+        private readonly ConcurrentDictionary<ulong, NodeInfo> _states = new ConcurrentDictionary<ulong, NodeInfo>();
+
+        public Server(INetwork network, Configuration config)
         {
             _network = network;
+            _config = config;
             _network.DataReceivedEventHandler += OnRequest;
+            UpdateLastRectFromserverTime();
+            _timer=new Timer(UpdateTimer,this,100,1000);
         }
-        
-        void SendCommand(UInt64 target, RedistDto.NetworkCommand command)
+
+        private void UpdateTimer(object state)
         {
-            var message = new RedistDto.NetworkMessage()
+            if (IfNoServMessageAtLeast(10))
             {
-                Target = target,
+                _network.Shutdown();
+                _network.Start(_config.MulticastInterface);
+            }
+            SendCommand(0,new NetworkCommand() {Echo=true});
+        }
+        private void UpdateLastRectFromserverTime() => _lastserverRectTime=DateTime.UtcNow;
+
+        private bool IfNoServMessageAtLeast(double seconds)
+        {
+            var period = (DateTime.UtcNow - _lastserverRectTime).TotalSeconds;
+            return (period < 0 || period > seconds);
+        }
+
+        private void SendCommand(ulong target, NetworkCommand command)
+        {
+            var message = new NetworkMessage
+            {
+                UnicalMessageTargetId = target,
                 ServerCommand = command
             };
             using (var stream = new MemoryStream(1500))
             {
-                ProtoBuf.Serializer.Serialize(stream, message);
+                Serializer.Serialize(stream, message);
                 _network.Send(stream.GetBuffer(), stream.Length);
             }
-
         }
-        
-        private void OnRequest(byte[] data, long datalen,IPAddress address)
+
+        private void OnRequest(byte[] data, long datalen, IPAddress address)
         {
-            using (var stream = new MemoryStream(data, 0,(int)datalen))
+            using (var stream = new MemoryStream(data, 0, (int) datalen))
             {
-                var message = ProtoBuf.Serializer.Deserialize<RedistDto.NetworkMessage>(stream);
+                var message = Serializer.Deserialize<NetworkMessage>(stream);
                 if (message?.ClientMessage != null)
-                    HandleClientRequest(message?.ClientMessage);
+                {
+                    UpdateLastRectFromserverTime();
+                    HandleClientRequest(message.ClientMessage);
+                }
             }
         }
 
         private void HandleClientRequest(ClientMessage clientMessage)
         {
-            if (clientMessage.ConfigRequest != null)
+            if (clientMessage.ConfigRequest?.NeedConfig==true)
                 HandleConfigRequest(clientMessage.SourceId, clientMessage.ConfigRequest);
         }
-        private static RoleSet test = new RoleSet() {Roles=new Role[] { new Role() {Name="Test",Repository="TestRep", StartupFile="UsbKDeviceTest.exe" } }
-         };
+
         private void HandleConfigRequest(ulong sourceId, ConfigRequest configRequest)
         {
-            SendCommand(sourceId, new NetworkCommand()
+            NodeInfo node;
+            if (!_states.TryGetValue(sourceId, out node))
             {
-                Id = RedistDto.CommandId.UpdateEndRestart,
-                Roles = test
+                node = new NodeInfo
+                {
+                    Id = sourceId,
+                    roles = DefaultRoles
+                };
+                _states[sourceId] = node;
+            }
+
+            SendCommand(sourceId, new NetworkCommand
+            {
+                Id = CommandId.UpdateEndRestart,
+                Roles = node.roles
             });
+        }
+
+        public void SendCommandToAll(CommandId command)
+        {
+            var set = _states.Values.ToArray();
+            foreach (var target in set)
+            {
+                SendCommand(target.Id, new NetworkCommand
+                {
+                    Id = command,
+                    Roles = target.roles
+                });
+            }
         }
     }
 }

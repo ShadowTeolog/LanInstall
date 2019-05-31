@@ -5,7 +5,7 @@ namespace RedistDto
     [ProtoContract]
     public class NetworkMessage
     {
-        [ProtoMember(1)] public UInt64 Target;
+        [ProtoMember(1)] public UInt64 UnicalMessageTargetId;
 
         [ProtoMember(2,IsRequired =false)]
         public NetworkCommand ServerCommand;

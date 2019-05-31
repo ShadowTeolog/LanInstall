@@ -6,21 +6,27 @@ using RedistDto;
 
 namespace RedistServ
 {
-    internal class Client
+    internal class Client 
     {
+        public event Action<string> StateChangeEvent;
+        public event Action<string> HandleErrorEvent;
         private CommandId? currentcommand=null; 
         readonly INetwork _network;
         private readonly Configuration _config;
         private readonly IRedistributionClient _redistribution;
-        private readonly System.Threading.Timer timer; 
+        private readonly Timer _timer;
+        private DateTime _lastserverRectTime;
         public Client(INetwork network, Configuration config, IRedistributionClient redistribution)
         {
             _network = network;
             _config = config;
             _redistribution = redistribution;
             _network.DataReceivedEventHandler += OnRequest;
-            timer=new Timer(UpdateTimer,this,100,1000);
+            UpdateLastRectFromserverTime();
+            _timer=new Timer(UpdateTimer,this,100,1000);
         }
+
+        
 
         private void UpdateTimer(object state)
         {
@@ -35,8 +41,16 @@ namespace RedistServ
                 {
                     Monitor.Exit(this);
                 }
+                if (IfNoServMessageAtLeast(10))
+                {
+                    HandleErrorEvent?.Invoke("Reconnect network after to long silent interval");
+                    UpdateLastRectFromserverTime();
+                    _network.Shutdown();
+                    _network.Start(_config.MulticastInterface);
+                }
             }
-
+            
+            SendMessage(new NetworkMessage() {ClientMessage = new ClientMessage() {Echo = true}});
         }
 
         void SendState()
@@ -48,17 +62,20 @@ namespace RedistServ
                     SourceId = _config.UnicalId,
                     ConfigRequest = new ConfigRequest()
                     {
-
+                        NeedConfig = true
                     }
                 }
             };
+            SendMessage(message);
+        }
 
+        void SendMessage(NetworkMessage message)
+        {
             using (var stream = new MemoryStream(1500))
             {
                 ProtoBuf.Serializer.Serialize(stream, message);
                 _network.Send(stream.GetBuffer(), stream.Length);
             }
-
         }
         
         private void OnRequest(byte[] data, long datalen,IPAddress ip)
@@ -66,23 +83,42 @@ namespace RedistServ
             using (var stream = new MemoryStream(data, 0,(int)datalen))
             {
                 var message = ProtoBuf.Serializer.Deserialize<RedistDto.NetworkMessage>(stream);
-                if (message.Target == _config.UnicalId)
+                if (message.ClientMessage == null)
+                    UpdateLastRectFromserverTime(); //this is server message,reset server connetivity
+                
+                if (message.UnicalMessageTargetId == _config.UnicalId)
                 {
                     var servercommantr = message.ServerCommand;
                     HandleServerCommand(servercommantr, ip);
                 }
-                
-                
             }
+        }
+
+        private void UpdateLastRectFromserverTime() => _lastserverRectTime=DateTime.UtcNow;
+
+        private bool IfNoServMessageAtLeast(double seconds)
+        {
+            var period = (DateTime.UtcNow - _lastserverRectTime).TotalSeconds;
+            return (period < 0 || period > seconds);
         }
 
         private void HandleServerCommand(NetworkCommand servercommantr, IPAddress ip)
         {
             currentcommand = servercommantr.Id;
-            _redistribution.UpdateRoles(servercommantr.Id,servercommantr.Roles,ip);
+            switch (currentcommand)
+            {
+                case CommandId.RestartNetwork:
+                    Hub.RequestSystemShutdown();
+                    return;
+                case CommandId.ShutdownNetwork:
+                    Hub.RequestSystemReboot();
+                    return;
+            }
+            _redistribution.InvokeUpdateRoles(servercommantr.Id,servercommantr.Roles,ip);
         }
         public void Shutdown()
         {
+            _timer.Dispose();
             _network.DataReceivedEventHandler -= OnRequest;
         }
     }

@@ -1,11 +1,15 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.IO;
 
 namespace RedistServ
 {
     internal class RedistributionServer : IRedistributionServer
     {
+        
         private readonly string _path;
-        private Process gitdaemon;
+        private Process _gitdaemon;
+
         public RedistributionServer(string path)
         {
             _path = path;
@@ -13,24 +17,86 @@ namespace RedistServ
 
         public void Start()
         {
-            var executablename = ".\\gitea\\gitea-1.8-windows-4.0-amd64.exe";
-            var command =$"web";
+            var executablename = Path.Combine(_path,"gitea-1.8-windows-4.0-amd64.exe");
+            var command = "web";
             var startupinfo = new ProcessStartInfo(executablename, command)
             {
-                UseShellExecute = false
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WorkingDirectory = _path
             };
-            startupinfo.EnvironmentVariables["GITEA_WORK_DIR"] = _path;
-            gitdaemon=Process.Start(startupinfo);
+            //startupinfo.EnvironmentVariables["GITEA_WORK_DIR"] = _path;
+            startupinfo.EnvironmentVariables["USER"] = Environment.UserName;
+            HandleLogEvent($"run: {executablename} {command} in dir {_path} and user {Environment.UserName}");
+            var process = new Process {StartInfo = startupinfo};
+            process.OutputDataReceived += Process_OutputDataReceived;
+            process.ErrorDataReceived += Process_ErrorDataReceived;
+             process.Start();
+             process.BeginOutputReadLine();
+             process.BeginErrorReadLine();
+            _gitdaemon = process;
+
         }
+
+        
 
         public void Restart()
         {
             Shutdown();
         }
+
         public void Shutdown()
         {
-            gitdaemon?.Kill();
-            gitdaemon = null;
+            if (_gitdaemon != null)
+            {
+                if (!_gitdaemon.HasExited)
+                {
+                    _gitdaemon.CloseMainWindow();
+                    if(!_gitdaemon.WaitForExit(1000))
+                        _gitdaemon.Kill();
+                    _gitdaemon.Close();
+                }
+
+                _gitdaemon = null;
+            }
+        }
+
+        public event Action<string> HandleLogEvent;
+        public event Action<string> HandleErrorEvent;
+
+        private void Process_ErrorDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            try
+            {
+                if (e.Data != null)
+                {
+                    HandleErrorEvent?.Invoke(e.Data);
+                }
+
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+            
+        }
+
+        private void Process_OutputDataReceived(object sender, DataReceivedEventArgs e)
+        {
+            try
+            {
+                if (e.Data != null)
+                {
+                    HandleLogEvent?.Invoke(e.Data);
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+            }
+            
         }
     }
 }

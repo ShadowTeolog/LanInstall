@@ -11,3 +11,13 @@ RedistSrv/bin/Debug
 RedistSrv/bin/run/repository/repository
 RedistSrv/obj/Debug
 RedistSrv/bin/run/repository/log
+RedistClient/bin/Release
+RedistClient/bin/run/repository
+RedistSrv/bin/Release
+RedistSrv/bin/run/data
+RedistSrv/bin/run/log
+RedistSrv/bin/run/repository_lfs
+RedistSrv/obj
+RedistSrv/bin/run/repository/data
+RedistSrv/bin/run/repository/service
+LanInstall.sln.DotSettings.user

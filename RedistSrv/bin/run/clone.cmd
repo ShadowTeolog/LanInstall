@@ -1,1 +1,0 @@
-git clone git://10.1.10.123:9418/SharpTransport
