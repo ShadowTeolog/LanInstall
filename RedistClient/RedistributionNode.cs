@@ -83,7 +83,7 @@ namespace RedistServ
                         Logger.Trace("Fail to clean and run, failback to DryRun");
                         RunCommand(CommandId.DryRun, ip);
                     }
-
+                    Logger.Trace("Cleanup command complete");
                     break;
                 case CommandId.UpdateEndRestart:
                     if (!TryUpdateAndRun())
@@ -91,14 +91,14 @@ namespace RedistServ
                         Logger.Trace("Fail to clean and run, failback to DryRun");
                         RunCommand(CommandId.DryRun, ip);
                     }
-
+                    Logger.Trace("Update and restart command complete");
                     break;
                 case CommandId.DryRun:
                     if (!TryDryRun(ip))
                     {
                         //can't do anything here
                     }
-
+                    Logger.Trace("Dry run complete");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(currentcommand), currentcommand, null);
@@ -111,8 +111,10 @@ namespace RedistServ
             {
                 var path = RepositoryPath();
                 if (Directory.Exists(path))
+                {
+                    Logger.Trace("Deleting repository directory");
                     DirectoryUtils.DeleteDirectory(path);
-
+                }
                 Clone(ip);
                 Start();
                 return true;
@@ -131,7 +133,7 @@ namespace RedistServ
             try
             {
                 HardReset();
-                Update();
+                Pull();
                 Start();
                 return true;
             }
@@ -178,7 +180,13 @@ namespace RedistServ
 
 
         private void HardReset() => RunRepositoryCommand(RepositoryPath(), "reset --hard");
-        private void Update() => RunRepositoryCommand(RepositoryPath(), "pull");
+        private void Pull()
+        {
+            Trace("Pulling current branch");
+            RunRepositoryCommand(RepositoryPath(), "pull");
+            Trace("Pulling lfs");
+            RunRepositoryCommand(RepositoryPath(), "lfs pull");
+        }
 
         private void Start()
         {
@@ -196,11 +204,19 @@ namespace RedistServ
 
         private void Clone(IPAddress ip)
         {
+            Trace("Cloning from git");
             Directory.CreateDirectory(_basefolder);
             var branch = string.IsNullOrEmpty(_role.Branch) ? "master" : _role.Branch;
             var command = $"clone http://{ip}:3000/service/{_role.Repository}  --depth 1 --branch {branch}";
             Trace($"Cloning : {command}");
             RunRepositoryCommand(_basefolder, command);
+            Trace($"do lfs install");
+            RunRepositoryCommand(RepositoryPath(), "lfs install");
+            Trace($"do lfs fetch");
+            RunRepositoryCommand(RepositoryPath(), "lfs fetch");
+            Trace("Pulling lfs");
+            RunRepositoryCommand(RepositoryPath(), "lfs pull");
+            Trace("Cloning finished");
         }
 
         private void RunRepositoryCommand(string workdir, string command)

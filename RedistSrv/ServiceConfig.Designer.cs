@@ -64,7 +64,7 @@
             this.toolStripSeparator1,
             this.Exit});
             this.TrayContextMenu.Name = "TrayContextMenu";
-            this.TrayContextMenu.Size = new System.Drawing.Size(175, 148);
+            this.TrayContextMenu.Size = new System.Drawing.Size(175, 170);
             // 
             // ServiceMode
             // 

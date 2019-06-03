@@ -36,7 +36,7 @@ namespace RedistSrv
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            mLog.Lines = Hub.RequestLogLines(100);
+            mLog.Lines = Hub.RequestLogLines(30);
         }
     }
 }

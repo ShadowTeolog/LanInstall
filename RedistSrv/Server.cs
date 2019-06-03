@@ -32,8 +32,7 @@ namespace RedistServ
         {
             Roles = new[]
             {
-                new Role {Name = "NewVisuals", Repository = "NewVisuals", StartupFile = "Visualisation.exe",Branch = "test"},
-                //new Role {Name = "Test", Repository = "TestRep", StartupFile = "UsbKDeviceTest.exe"},
+                new Role {Name = "NewVisualsLTS", Repository = "NewVisualsLFS", StartupFile = "Visualisation.exe",Branch = "test"},
                 new Role {Name = "RedistClient", Repository = "RedistClient"}
             }
         };

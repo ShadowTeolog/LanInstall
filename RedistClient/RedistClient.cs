@@ -40,14 +40,19 @@ namespace RedistClient
 
         private void RedistClient_FormClosing(object sender, FormClosingEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                e.Cancel = true;
+                Hide();
+            }
         }
         private void notifyIcon1_Click(object sender, EventArgs e) => Show();
 
         private void mLogUpdateTimer_Tick(object sender, EventArgs e)
         {
-            logWindow.Lines = Hub.RequestLogLines(100);
+            logWindow.Lines = Hub.RequestLogLines(30);
         }
+
+        private void Exit_Click(object sender, EventArgs e)=> Application.Exit();
     }
 }
