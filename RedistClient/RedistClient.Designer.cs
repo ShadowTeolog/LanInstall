@@ -31,14 +31,14 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(RedistClient));
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.Status = new System.Windows.Forms.Label();
-            this.logWindow = new System.Windows.Forms.TextBox();
-            this.mLogUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.TrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ServiceMode = new System.Windows.Forms.ToolStripMenuItem();
             this.RestartAll = new System.Windows.Forms.ToolStripMenuItem();
             this.DryRunUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.Exit = new System.Windows.Forms.ToolStripMenuItem();
+            this.Status = new System.Windows.Forms.Label();
+            this.logWindow = new System.Windows.Forms.TextBox();
+            this.mLogUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.TrayContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -49,6 +49,44 @@
             this.notifyIcon1.Text = "Redistribution client";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.Click += new System.EventHandler(this.notifyIcon1_Click);
+            // 
+            // TrayContextMenu
+            // 
+            this.TrayContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.ServiceMode,
+            this.RestartAll,
+            this.DryRunUpdate,
+            this.Exit});
+            this.TrayContextMenu.Name = "TrayContextMenu";
+            this.TrayContextMenu.Size = new System.Drawing.Size(154, 92);
+            // 
+            // ServiceMode
+            // 
+            this.ServiceMode.Name = "ServiceMode";
+            this.ServiceMode.Size = new System.Drawing.Size(153, 22);
+            this.ServiceMode.Text = "Service mode";
+            this.ServiceMode.Click += new System.EventHandler(this.ServiceMode_Click);
+            // 
+            // RestartAll
+            // 
+            this.RestartAll.Name = "RestartAll";
+            this.RestartAll.Size = new System.Drawing.Size(153, 22);
+            this.RestartAll.Text = "Restart roles";
+            this.RestartAll.Click += new System.EventHandler(this.RestartAll_Click);
+            // 
+            // DryRunUpdate
+            // 
+            this.DryRunUpdate.Name = "DryRunUpdate";
+            this.DryRunUpdate.Size = new System.Drawing.Size(153, 22);
+            this.DryRunUpdate.Text = "Dry run update";
+            this.DryRunUpdate.Click += new System.EventHandler(this.DryRunUpdate_Click);
+            // 
+            // Exit
+            // 
+            this.Exit.Name = "Exit";
+            this.Exit.Size = new System.Drawing.Size(153, 22);
+            this.Exit.Text = "Stop and exit";
+            this.Exit.Click += new System.EventHandler(this.Exit_Click);
             // 
             // Status
             // 
@@ -77,41 +115,6 @@
             this.mLogUpdateTimer.Enabled = true;
             this.mLogUpdateTimer.Interval = 500;
             this.mLogUpdateTimer.Tick += new System.EventHandler(this.mLogUpdateTimer_Tick);
-            // 
-            // TrayContextMenu
-            // 
-            this.TrayContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.ServiceMode,
-            this.RestartAll,
-            this.DryRunUpdate,
-            this.Exit});
-            this.TrayContextMenu.Name = "TrayContextMenu";
-            this.TrayContextMenu.Size = new System.Drawing.Size(154, 92);
-            // 
-            // ServiceMode
-            // 
-            this.ServiceMode.Name = "ServiceMode";
-            this.ServiceMode.Size = new System.Drawing.Size(153, 22);
-            this.ServiceMode.Text = "Service mode";
-            // 
-            // RestartAll
-            // 
-            this.RestartAll.Name = "RestartAll";
-            this.RestartAll.Size = new System.Drawing.Size(153, 22);
-            this.RestartAll.Text = "Restart roles";
-            // 
-            // DryRunUpdate
-            // 
-            this.DryRunUpdate.Name = "DryRunUpdate";
-            this.DryRunUpdate.Size = new System.Drawing.Size(153, 22);
-            this.DryRunUpdate.Text = "Dry run update";
-            // 
-            // Exit
-            // 
-            this.Exit.Name = "Exit";
-            this.Exit.Size = new System.Drawing.Size(153, 22);
-            this.Exit.Text = "Stop and exit";
-            this.Exit.Click += new System.EventHandler(this.Exit_Click);
             // 
             // RedistClient
             // 

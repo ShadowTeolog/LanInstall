@@ -54,5 +54,20 @@ namespace RedistClient
         }
 
         private void Exit_Click(object sender, EventArgs e)=> Application.Exit();
+
+        private void ServiceMode_Click(object sender, EventArgs e)
+        {
+            Show();
+        }
+
+        private void RestartAll_Click(object sender, EventArgs e)
+        {
+            Hub.RestartRoles();
+        }
+
+        private void DryRunUpdate_Click(object sender, EventArgs e)
+        {
+            //
+        }
     }
 }

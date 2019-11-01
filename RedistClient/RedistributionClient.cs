@@ -38,7 +38,12 @@ namespace RedistServ
                 if (!taskinprogress) Task.Run(() => UpdateRoles());
             }
         }
-       
+
+        public void InvokeRestart()
+        {
+            
+        }
+
         private void UpdateRoles()
         {
             try
@@ -61,7 +66,7 @@ namespace RedistServ
                     {
                         try
                         {
-                            DirectoryUtils.DeleteDirectory(_repositorystoragepath);
+                            DirectoryUtils.TryDeleteDirectory(_repositorystoragepath);
                         }
                         catch (Exception e)
                         {

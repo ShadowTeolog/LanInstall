@@ -18,6 +18,7 @@ namespace RedistServ
         event Action         UpdateComplete;
         event Action<string> StateChangeEvent;
         void InvokeUpdateRoles(CommandId servercommantrId, RoleSet servercommantrRoles, IPAddress ip);
+        void InvokeRestart();
     }
 
     public static class Hub
@@ -116,6 +117,11 @@ namespace RedistServ
                 process.Start();
                 process.WaitForExit();
             }
+        }
+
+        public static void RestartRoles()
+        {
+            redistribution.InvokeRestart();
         }
     }
 }

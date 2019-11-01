@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace RedistServ
 {
@@ -17,9 +18,9 @@ namespace RedistServ
 
         public void Start()
         {
-            var executablename = Path.Combine(_path,"gitea-1.8-windows-4.0-amd64.exe");
+            var giteaname=Directory.GetFiles(_path, "gitea-*.exe").FirstOrDefault();
             var command = "web";
-            var startupinfo = new ProcessStartInfo(executablename, command)
+            var startupinfo = new ProcessStartInfo(giteaname, command)
             {
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
@@ -29,7 +30,7 @@ namespace RedistServ
             };
             //startupinfo.EnvironmentVariables["GITEA_WORK_DIR"] = _path;
             startupinfo.EnvironmentVariables["USER"] = Environment.UserName;
-            HandleLogEvent($"run: {executablename} {command} in dir {_path} and user {Environment.UserName}");
+            HandleLogEvent($"run: {giteaname} {command} in dir {_path} and user {Environment.UserName}");
             var process = new Process {StartInfo = startupinfo};
             process.OutputDataReceived += Process_OutputDataReceived;
             process.ErrorDataReceived += Process_ErrorDataReceived;

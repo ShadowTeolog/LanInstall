@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
+            this.NotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.TrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.ServiceMode = new System.Windows.Forms.ToolStripMenuItem();
             this.RestartAll = new System.Windows.Forms.ToolStripMenuItem();
@@ -45,12 +45,13 @@
             this.TrayContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
-            // notifyIcon1
+            // NotifyIcon
             // 
-            this.notifyIcon1.ContextMenuStrip = this.TrayContextMenu;
-            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
-            this.notifyIcon1.Text = "RedistServer";
-            this.notifyIcon1.Visible = true;
+            this.NotifyIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.NotifyIcon.ContextMenuStrip = this.TrayContextMenu;
+            this.NotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("NotifyIcon.Icon")));
+            this.NotifyIcon.Text = "RedistServer";
+            this.NotifyIcon.Visible = true;
             // 
             // TrayContextMenu
             // 
@@ -64,7 +65,7 @@
             this.toolStripSeparator1,
             this.Exit});
             this.TrayContextMenu.Name = "TrayContextMenu";
-            this.TrayContextMenu.Size = new System.Drawing.Size(175, 170);
+            this.TrayContextMenu.Size = new System.Drawing.Size(175, 148);
             // 
             // ServiceMode
             // 
@@ -120,6 +121,9 @@
             // 
             // mLog
             // 
+            this.mLog.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.mLog.Location = new System.Drawing.Point(3, 3);
             this.mLog.Multiline = true;
             this.mLog.Name = "mLog";
@@ -154,7 +158,7 @@
 
         #endregion
 
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        private System.Windows.Forms.NotifyIcon NotifyIcon;
         private System.Windows.Forms.ContextMenuStrip TrayContextMenu;
         private System.Windows.Forms.ToolStripMenuItem RestartAll;
         private System.Windows.Forms.ToolStripMenuItem DryRunUpdate;

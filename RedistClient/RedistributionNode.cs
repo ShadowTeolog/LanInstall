@@ -2,17 +2,25 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Messaging;
+using System.Windows.Forms.VisualStyles;
+using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 using NLog;
 using RedistDto;
 
 namespace RedistServ
 {
-    internal class RedistributionNode : IDisposable
+    internal partial class RedistributionNode : IDisposable
     {
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         private readonly string _basefolder;
         private readonly Role _role;
         private Process _nodeprocess;
+        private volatile bool _taskNeedToBeRunning;
+        
+
         public RedistributionNode(Role role, string basefolder)
         {
             _role = role;
@@ -24,24 +32,32 @@ namespace RedistServ
         {
             try
             {
-                if (_nodeprocess != null)
-                {
-                    if (!_nodeprocess.HasExited)
-                    {
-                        _nodeprocess.CloseMainWindow();
-                        
-                        if(!_nodeprocess.WaitForExit(1000))
-                            _nodeprocess.Kill();
-                        _nodeprocess.Close();
-                    }
-                }
+                StopProcess();
             }
             catch (Exception e)
             {
                 Error(e.Message);
             }
-            
+
             _nodeprocess = null;
+        }
+
+        private void StopProcess()
+        {
+            _taskNeedToBeRunning = false;
+            if (_nodeprocess == null)
+                return;
+            var processtostop = _nodeprocess;
+            _nodeprocess = null;
+            if (!processtostop.HasExited)
+            {
+                processtostop.CloseMainWindow();
+                if (!processtostop.WaitForExit(2000))
+                    processtostop.Kill();
+                processtostop.Close();
+            }
+
+            
         }
 
         public event Action<string> TraceEvent;
@@ -83,6 +99,7 @@ namespace RedistServ
                         Logger.Trace("Fail to clean and run, failback to DryRun");
                         RunCommand(CommandId.DryRun, ip);
                     }
+
                     Logger.Trace("Cleanup command complete");
                     break;
                 case CommandId.UpdateEndRestart:
@@ -91,6 +108,7 @@ namespace RedistServ
                         Logger.Trace("Fail to clean and run, failback to DryRun");
                         RunCommand(CommandId.DryRun, ip);
                     }
+
                     Logger.Trace("Update and restart command complete");
                     break;
                 case CommandId.DryRun:
@@ -98,6 +116,7 @@ namespace RedistServ
                     {
                         //can't do anything here
                     }
+
                     Logger.Trace("Dry run complete");
                     break;
                 default:
@@ -110,12 +129,11 @@ namespace RedistServ
             try
             {
                 var path = RepositoryPath();
-                if (Directory.Exists(path))
-                {
-                    Logger.Trace("Deleting repository directory");
-                    DirectoryUtils.DeleteDirectory(path);
-                }
-                Clone(ip);
+
+                Logger.Trace("try deleting repository directory");
+                DirectoryUtils.DeleteDirectory(path,Trace);
+
+                GitClone(ip);
                 Start();
                 return true;
             }
@@ -132,8 +150,8 @@ namespace RedistServ
         {
             try
             {
-                HardReset();
-                Pull();
+                GitHardReset();
+                GitPull();
                 Start();
                 return true;
             }
@@ -150,6 +168,7 @@ namespace RedistServ
         {
             try
             {
+                StopProcess();
                 Start();
                 return true;
             }
@@ -166,7 +185,8 @@ namespace RedistServ
         {
             try
             {
-                HardReset();
+                StopProcess();
+                GitHardReset();
                 Start();
                 return true;
             }
@@ -179,15 +199,6 @@ namespace RedistServ
         }
 
 
-        private void HardReset() => RunRepositoryCommand(RepositoryPath(), "reset --hard");
-        private void Pull()
-        {
-            Trace("Pulling current branch");
-            RunRepositoryCommand(RepositoryPath(), "pull");
-            Trace("Pulling lfs");
-            RunRepositoryCommand(RepositoryPath(), "lfs pull");
-        }
-
         private void Start()
         {
             if (!string.IsNullOrEmpty(_role.StartupFile))
@@ -198,52 +209,24 @@ namespace RedistServ
                 {
                     WorkingDirectory = workingdir
                 };
-                _nodeprocess = Process.Start(settings);
-            }
-        }
-
-        private void Clone(IPAddress ip)
-        {
-            Trace("Cloning from git");
-            Directory.CreateDirectory(_basefolder);
-            var branch = string.IsNullOrEmpty(_role.Branch) ? "master" : _role.Branch;
-            var command = $"clone http://{ip}:3000/service/{_role.Repository}  --depth 1 --branch {branch}";
-            Trace($"Cloning : {command}");
-            RunRepositoryCommand(_basefolder, command);
-            Trace($"do lfs install");
-            RunRepositoryCommand(RepositoryPath(), "lfs install");
-            Trace($"do lfs fetch");
-            RunRepositoryCommand(RepositoryPath(), "lfs fetch");
-            Trace("Pulling lfs");
-            RunRepositoryCommand(RepositoryPath(), "lfs pull");
-            Trace("Cloning finished");
-        }
-
-        private void RunRepositoryCommand(string workdir, string command)
-        {
-            using (var process = new Process())
-            {
-                process.StartInfo = new ProcessStartInfo("git", command)
+                var startporcess = new Process
                 {
-                    WorkingDirectory = workdir,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                    //WindowStyle = ProcessWindowStyle.Hidden
+                    StartInfo = settings
                 };
-                process.OutputDataReceived += (s, e) => Trace(e.Data);
-                process.ErrorDataReceived += (s, e) => Error(e.Data);
-
-                process.Start();
-                process.BeginOutputReadLine();
-                process.BeginErrorReadLine();
-                process.WaitForExit();
+                _taskNeedToBeRunning = true;
+                startporcess.Exited += Startporcess_Exited;
+                startporcess.Start();
+                _nodeprocess = startporcess;
             }
+        }
+
+        private void Startporcess_Exited(object sender, EventArgs e)
+        {
+            if (_taskNeedToBeRunning)
+                Start();
         }
 
 
         private string RepositoryPath() => Path.Combine(_basefolder, _role.Repository);
-        
     }
 }
