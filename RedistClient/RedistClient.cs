@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using NLog.Windows.Forms;
 using RedistServ;
 
 namespace RedistClient
@@ -12,6 +13,7 @@ namespace RedistClient
             Hub.StateChangeEvent += Hub_StateChangeEvent;
             Hub.UpdateStart += Hub_UpdateStart;
             Hub.UpdateComplete += Hub_UpdateComplete;
+            RichTextBoxTarget.ReInitializeAllTextboxes(this);
         }
 
         private void Hub_UpdateComplete()
@@ -48,10 +50,7 @@ namespace RedistClient
         }
         private void notifyIcon1_Click(object sender, EventArgs e) => Show();
 
-        private void mLogUpdateTimer_Tick(object sender, EventArgs e)
-        {
-            logWindow.Lines = Hub.RequestLogLines(30);
-        }
+        
 
         private void Exit_Click(object sender, EventArgs e)=> Application.Exit();
 

@@ -18,18 +18,25 @@ namespace RedistClient
         [STAThread]
         static void Main(string[] args)
         {
-            if(RunCommand(args))
-                return;
-            
-            Hub.Start();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+            if (RunCommand(args))
+            {
+                Logger.Trace("Exit after command execution");
+                return;
+            }
+            Logger.Trace("Starting..");
+
+            Hub.Start();
+            
             Application.Run(new RedistClient());
             Hub.Shutdown();
         }
 
         private static bool RunCommand(string[] args)
         {
+            
             var wantinstall = false;
             var show_help = false;
             var mydirectory = Directory.GetCurrentDirectory();
@@ -59,8 +66,12 @@ namespace RedistClient
             }
             if (wantinstall )
             {
+                Logger.Trace("Trying update client application");
                 if (installpath == null)
-                    Console.WriteLine("Can't find install directory");
+                {
+                    var message = "Can't find install directory , install path not found";
+                    Logger.Error(message);
+                }
                 else                
                     DirectoryUtils.Copy(mydirectory,installpath.FullName,e=>Logger.Trace(e));
                 return true;

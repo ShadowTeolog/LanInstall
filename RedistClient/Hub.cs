@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using NLog;
 using RedistDto;
 
 namespace RedistServ
@@ -23,9 +24,7 @@ namespace RedistServ
 
     public static class Hub
     {
-        private const int standartlogcapacity = 500;
-        private static List<string> loglines=new List<string>(standartlogcapacity*2);
-        private static volatile string[] _lastlogresult;
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public static event Action<string> StateChangeEvent;
         public static event Action         UpdateStart;
         public static event Action         UpdateComplete;
@@ -48,8 +47,6 @@ namespace RedistServ
 
             _client=new Client(network,config,redistribution);
             _client.StateChangeEvent += (s) => StateChangeEvent?.Invoke(s);
-            _client.HandleErrorEvent += _client_HandleErrorEvent;
-            
         }
 
         
@@ -60,43 +57,9 @@ namespace RedistServ
             network.Shutdown();
         }
 
-        private static void _client_HandleErrorEvent(string message)
-        {
-            lock (loglines)
-            {
-                loglines?.Add(message);
-                if(loglines.Count>=standartlogcapacity*2-1)
-                    loglines.RemoveRange(0,loglines.Count-standartlogcapacity);
-                _lastlogresult = null;
-            }
-        }
+        private static void _client_HandleErrorEvent(string message) => Logger.Error(message);
 
-        private static void _client_HandleLogEvent(string message)
-        {
-            lock (loglines)
-            {
-                loglines?.Add(message);
-                if(loglines.Count>=standartlogcapacity*2-1)
-                    loglines.RemoveRange(0,loglines.Count-standartlogcapacity);
-                _lastlogresult = null;
-            }
-        }
-
-        
-        public static string[] RequestLogLines(int count)
-        {
-            if (_lastlogresult != null)
-                return _lastlogresult;
-            lock (loglines)
-            {
-                var realcount = Math.Min(loglines.Count, count);
-                var realoffset = loglines.Count - realcount;
-                var newresult=loglines.Skip(realoffset).ToArray();
-                _lastlogresult = newresult;
-                return newresult;
-            }
-            
-        }
+        private static void _client_HandleLogEvent(string message) => Logger.Trace(message);
 
         public static void RequestSystemShutdown()
         {

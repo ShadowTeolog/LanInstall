@@ -37,8 +37,7 @@
             this.DryRunUpdate = new System.Windows.Forms.ToolStripMenuItem();
             this.Exit = new System.Windows.Forms.ToolStripMenuItem();
             this.Status = new System.Windows.Forms.Label();
-            this.logWindow = new System.Windows.Forms.TextBox();
-            this.mLogUpdateTimer = new System.Windows.Forms.Timer(this.components);
+            this.nlogtarget = new System.Windows.Forms.RichTextBox();
             this.TrayContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -96,32 +95,28 @@
             this.Status.Location = new System.Drawing.Point(2, 14);
             this.Status.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.Status.Name = "Status";
-            this.Status.Size = new System.Drawing.Size(823, 20);
+            this.Status.Size = new System.Drawing.Size(1194, 20);
             this.Status.TabIndex = 1;
             this.Status.Text = "Searching for server";
             this.Status.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // logWindow
+            // nlogtarget
             // 
-            this.logWindow.Location = new System.Drawing.Point(-3, 37);
-            this.logWindow.Multiline = true;
-            this.logWindow.Name = "logWindow";
-            this.logWindow.ReadOnly = true;
-            this.logWindow.Size = new System.Drawing.Size(840, 344);
-            this.logWindow.TabIndex = 2;
-            // 
-            // mLogUpdateTimer
-            // 
-            this.mLogUpdateTimer.Enabled = true;
-            this.mLogUpdateTimer.Interval = 500;
-            this.mLogUpdateTimer.Tick += new System.EventHandler(this.mLogUpdateTimer_Tick);
+            this.nlogtarget.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.nlogtarget.Location = new System.Drawing.Point(6, 37);
+            this.nlogtarget.Name = "nlogtarget";
+            this.nlogtarget.Size = new System.Drawing.Size(1200, 341);
+            this.nlogtarget.TabIndex = 3;
+            this.nlogtarget.Text = "";
             // 
             // RedistClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(838, 380);
-            this.Controls.Add(this.logWindow);
+            this.ClientSize = new System.Drawing.Size(1209, 380);
+            this.Controls.Add(this.nlogtarget);
             this.Controls.Add(this.Status);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -133,7 +128,6 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RedistClient_FormClosing);
             this.TrayContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -141,13 +135,12 @@
 
         private System.Windows.Forms.NotifyIcon notifyIcon1;
         private System.Windows.Forms.Label Status;
-        private System.Windows.Forms.TextBox logWindow;
-        private System.Windows.Forms.Timer mLogUpdateTimer;
         private System.Windows.Forms.ContextMenuStrip TrayContextMenu;
         private System.Windows.Forms.ToolStripMenuItem ServiceMode;
         private System.Windows.Forms.ToolStripMenuItem RestartAll;
         private System.Windows.Forms.ToolStripMenuItem DryRunUpdate;
         private System.Windows.Forms.ToolStripMenuItem Exit;
+        private System.Windows.Forms.RichTextBox nlogtarget;
     }
 }
 

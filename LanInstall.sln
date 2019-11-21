@@ -1,12 +1,14 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedistDto", "RedistDto\RedistDto.csproj", "{464C1FE5-F715-4221-812D-7D8A370349EF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedistSrv", "RedistSrv\RedistSrv.csproj", "{27EADFFD-1918-4CB3-8283-F95F9703EB2D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RedistClient", "RedistClient\RedistClient.csproj", "{02B0036A-FD4B-4032-ADC3-B745B6C42747}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LanInstallSetup", "LanInstallSetup\LanInstallSetup.csproj", "{C9A243E5-6443-4A00-ACAC-C20A61286264}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,8 +42,19 @@ Global
 		{02B0036A-FD4B-4032-ADC3-B745B6C42747}.Release|Any CPU.Build.0 = Release|Any CPU
 		{02B0036A-FD4B-4032-ADC3-B745B6C42747}.Release|x86.ActiveCfg = Release|Any CPU
 		{02B0036A-FD4B-4032-ADC3-B745B6C42747}.Release|x86.Build.0 = Release|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Debug|x86.Build.0 = Debug|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Release|x86.ActiveCfg = Release|Any CPU
+		{C9A243E5-6443-4A00-ACAC-C20A61286264}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4F316948-DE2D-4615-A38B-96F1C5598BD4}
 	EndGlobalSection
 EndGlobal

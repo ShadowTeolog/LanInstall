@@ -21,3 +21,7 @@ RedistSrv/obj
 RedistSrv/bin/run/repository/data
 RedistSrv/bin/run/repository/service
 LanInstall.sln.DotSettings.user
+LanInstallSetup/bin
+LanInstallSetup/obj
+LanInstallSetup/wix
+LanInstallSetup/RedistServer.msi

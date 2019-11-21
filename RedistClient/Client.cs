@@ -2,14 +2,15 @@
 using System.IO;
 using System.Net;
 using System.Threading;
+using NLog;
 using RedistDto;
 
 namespace RedistServ
 {
     internal class Client 
     {
+        private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
         public event Action<string> StateChangeEvent;
-        public event Action<string> HandleErrorEvent;
         private CommandId? currentcommand=null; 
         readonly INetwork _network;
         private readonly Configuration _config;
@@ -43,7 +44,7 @@ namespace RedistServ
                 }
                 if (IfNoServMessageAtLeast(10))
                 {
-                    HandleErrorEvent?.Invoke("Reconnect network after to long silent interval");
+                    Logger.Trace("Reconnect network after to long silent interval");
                     UpdateLastRectFromserverTime();
                     _network.Shutdown();
                     _network.Start(_config.MulticastInterface);
